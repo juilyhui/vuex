@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <div class="" id="app">
+            <p>
+                {{count}}
+            </p>
+            <p>
+                <button type="button" name="button1" @click="increment">+</button>
+                <button type="button" name="button2" @click="decrement">-</button>
+            </p>
+        </div>
+
+        <script src="./node_modules/vue/dist/vue.js" charset="utf-8"></script>
+        <script src="./node_modules/vuex/dist/vuex.js" charset="utf-8"></script>
+        <script type="text/javascript">
+            /**
+            * Getters
+            */
+
+            // 有时候我们需要从 store 中的 state 中派生出一些状态，例如对列表进行过滤并计数：
+            // 如果有多个组件需要用到此属性，我们要么复制这个函数，或者抽取到一个共享函数然后在多处导入它 —— 无论哪种方式都不是很理想。
+            computer: {
+                doneTodoCount(){
+                    return this.$store.state.todos.filter(function(todo){
+                        return todo.done
+                    }).length
+                }
+            }
+            // Vuex 允许我们在 store 中定义『getters』（可以认为是 store 的计算属性）：
+            var store = new Vuex.Store({
+                state: {
+                    todos: [
+                        {id: 1, text: 'first', done: true},
+                        {id: 2, text: 'seconds', done: false}
+                    ]
+                },
+                getters: {
+                    doneTodos: function(state){ // Getters接受state作为其第一个参数
+                        return state.todos.filter(function(todo){
+                            return todo.done
+                        })
+                    },
+                    doneTodoCount: function(state, getters){ // Getters也可以接受其他getters作为第二个参数
+                        return getters.doneTodos.length
+                    }
+                }
+            })
+            // Getters 会暴露为 store.getters 对象：
+            store.getters.doneTodos // [{id: 1, text: 'first', done: true}]
+
+
+            /**
+            * mapGetters辅助函数
+            * mapGetters 辅助函数仅仅是将 store 中的 getters 映射到局部计算属性
+            */
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <div class="" id="app">
+            <p>
+                {{count}}
+            </p>
+            <p>
+                <button type="button" name="button1" @click="increment">+</button>
+                <button type="button" name="button2" @click="decrement">-</button>
+            </p>
+        </div>
+
+        <script src="./node_modules/vue/dist/vue.js" charset="utf-8"></script>
+        <script src="./node_modules/vuex/dist/vuex.js" charset="utf-8"></script>
+        <script type="text/javascript">
+            /**
+            * Actions
+            * 类似于mutation，不同在于
+                Action 提交的是 mutation，而不是直接变更状态。
+                Action 可以包含任意异步操作。
+            */
+
+            var store = new Vuex.Store({
+                state: {
+                    count: 0
+                },
+                mutations: {
+                    increment(state){
+                        state.count++
+                    }
+                },
+                actions: {
+                    increment(context){ // Action 函数接受一个与 store 实例具有相同方法和属性的 context 对象，但 context 对象不是 store 实例本身
+                        context.commit('increment')
+                    }
+                }
+            })
+
+            /**
+            * 分发Actions
+            */
+
+            // action 通过store.dispatch方法触发
+            // mutation必须同步执行！！！Action就不受约束！！！
+            store.dispatch('increment')
+
+            // 在action内部执行异步操作
+            actions: {
+                incrementAsync(context){
+                    // 异步操作
+                    setTimeout(function(){
+                        context.commit('increment')
+                    }, 1000)
+                }
+            }
+
+            // Actions 支持同样的载荷方式和对象方式进行分发：
+            // 以载荷形式分发
+            store.dispatch('incrementAsync', {
+                amount: 10
+            })
+            // 以对象形式分发
+            store.dispatch({
+                type: 'incrementAsync',
+                amount: 10
+            })
+
+            /**
+            * 在组件中分发 Action
+            * 你在组件中使用 this.$store.dispatch('xxx') 分发 action
+            * 或者使用 mapActions 辅助函数将组件的 methods 映射为 store.dispatch 调用（需要先在根节点注入 store）：
+            */
+
+            /**
+            * 组合Actions
+            */
+
+            // store.dispatch 可以处理被触发的action的回调函数返回的Promise，并且store.dispatch仍旧返回Promise：
+            actions: {
+                actionA(context){
+                    return new Promise(function(resolve, reject){
+                        setTimeout(function(){
+                            context.commit('someMutations')
+                            resolve()
+                        }, 1000)
+                    })
+                },
+                actionB(context){
+                    return context.dispatch('actionA').then(function(){
+                        context.commit('comeOtherMutation')
+                    })
+                }
+            }
+            store.dispatch('actionA').then(function(){
+                // ……
+            })
+
+            // 一个 store.dispatch 在不同模块中可以触发多个 action 函数。在这种情况下，只有当所有触发函数完成后，返回的 Promise 才会执行。
+
+
+
+
+
+        </script>
+    </body>
+</html>

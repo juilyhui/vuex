@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <div class="" id="app">
+            <p>
+                {{count}}
+            </p>
+            <p>
+                <button type="button" name="button1" @click="increment">+</button>
+                <button type="button" name="button2" @click="decrement">-</button>
+            </p>
+        </div>
+
+        <script src="./node_modules/vue/dist/vue.js" charset="utf-8"></script>
+        <script src="./node_modules/vuex/dist/vuex.js" charset="utf-8"></script>
+        <script type="text/javascript">
+            /**
+            * 插件
+            */
+
+            // 定义Vuex插件eg：
+            var myPlugin = function(store){ // Vuex 插件就是一个函数，它接收 store 作为唯一参数
+                // 当store初始化后调用
+                store.subscribe(function(mutation, state){
+                    // 每次mutation之后调用
+                    // mutation对象的格式为{type, payload}
+                })
+            }
+            var store = new Vuex.Store({
+                // ……
+                plugins: [myPlugin] // 插件使用。Vuex 的 store 接受 plugins 选项，这个选项暴露出每次 mutation 的钩子。
+            })
+
+
+            /**
+            * 在插件内提交 Mutation
+            * 在插件中不允许直接修改状态——类似于组件，只能通过提交 mutation 来触发变化。
+            * 通过提交 mutation，插件可以用来同步数据源到 store。
+            */
+
+            // 同步websocket数据源到store，eg：
+            var plugin = function(socket){
+                return function(store){
+                    socket.on('date', function(data){
+                        store.commit('receiveData', data)
+                    })
+                    store.subscribe(function(mutation){
+                        if(mutation.type === 'UPDATE_DATA'){
+                            socket.emit('update', mutation.payload)
+                        }
+                    })
+                }
+            }
+            var store = new Vuex.Store({
+                state,
+                mutations,
+                plugins: [plugin]
+            })
+
+
+            /**
+            * 生成State快照
+            */
+
+            // 有时候插件需要获得状态的『快照』，比较改变的前后状态。想要实现这项功能，你需要对状态对象进行深拷贝
+            var myPluginWithSnapshot = function(store){
+                var prevState = _.cloneDeep(store.state)
+                store.subscribe(function(mutation, state){
+                    var nextState = _.cloneDeep(state)
+
+                    // 比较prevState和nextState
+
+                    // 保存状态，用于下一次mutation
+                    prevState = nextState
+                })
+            }
+            // 生成状态快照的插件应该只在开发阶段使用，使用 Webpack 或 Browserify，让构建工具帮我们处理：
+            var store = new Vuex.Store({
+                // ……
+                plugins: process.env.NODE_ENV !== 'production' ? [myPluginWithSnapshot] : []
+            })
+            // 上面插件会默认启用。
+            // 在发布阶段，你需要使用 Webpack 的 DefinePlugin 或者是 Browserify 的 envify 使 process.env.NODE_ENV !== 'production' 为 false。
+
+
+
+
+
+        </script>
+    </body>
+</html>
